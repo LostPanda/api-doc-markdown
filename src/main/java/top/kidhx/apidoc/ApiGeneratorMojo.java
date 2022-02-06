@@ -70,6 +70,7 @@ public class ApiGeneratorMojo extends AbstractMojo {
     private void init() throws MojoExecutionException {
         this.log = getLog();
         classScanner = new ClassScanner(log);
+        urlClassLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
         classMetaReader = ClassMetaReaderFactory.createClassReader(getReaderType(), mavenProject, log, urlClassLoader);
         if (CollectionUtils.isEmpty(exporters)) {
             exporters = Lists.newArrayList(
@@ -77,9 +78,7 @@ public class ApiGeneratorMojo extends AbstractMojo {
                             .setExporterName("file")
                             .setParameters(new ImmutableMap.Builder<String, String>()
                                     .put("output", outputDirectory.getAbsolutePath() + File.separator + "apiDoc" + File.separator)
-                                    .build()
-                            )
-            );
+                                    .build()));
         }
     }
 

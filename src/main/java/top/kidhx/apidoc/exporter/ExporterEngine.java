@@ -27,6 +27,7 @@ public class ExporterEngine {
 
     public ExporterEngine(Log log) {
         this.log = log;
+        exporterMap.put("file", FileDocExporter.class);
     }
 
     public void invoke(ExporterDefinition exporterDefinition, List<MarkDownApi> markDownApis) {
@@ -40,16 +41,18 @@ public class ExporterEngine {
             Constructor<? extends DocExporter> declaredConstructor = exporterClass.getDeclaredConstructor(Log.class);
             DocExporter docExporter = declaredConstructor.newInstance(log);
             Map<String, String> parameters = exporterDefinition.getParameters();
-            parameters.forEach((k, v) -> {
-                Field declaredField = null;
-                try {
-                    declaredField = exporterClass.getDeclaredField(k);
-                    declaredField.setAccessible(true);
-                    declaredField.set(docExporter, v);
-                } catch (NoSuchFieldException | IllegalAccessException e) {
-                    throw new IllegalStateException(exporterDefinition + "配置错误:" + e.getMessage());
-                }
-            });
+            if(parameters != null){
+                parameters.forEach((k, v) -> {
+                    Field declaredField = null;
+                    try {
+                        declaredField = exporterClass.getDeclaredField(k);
+                        declaredField.setAccessible(true);
+                        declaredField.set(docExporter, v);
+                    } catch (NoSuchFieldException | IllegalAccessException e) {
+                        throw new IllegalStateException(exporterDefinition + "配置错误:" + e.getMessage());
+                    }
+                });
+            }
             return docExporter;
         } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new IllegalStateException(exporterDefinition + "配置错误:" + e.getMessage());

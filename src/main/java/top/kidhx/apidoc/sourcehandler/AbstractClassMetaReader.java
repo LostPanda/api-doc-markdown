@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static top.kidhx.apidoc.sourcehandler.ClassScanner.SLASH_REGEXP;
+
 /**
  * @author HX
  * @date 2022/1/31
@@ -86,14 +88,17 @@ public abstract class AbstractClassMetaReader {
         }
         final String prefix = artifactId.substring(0, artifactId.indexOf("-") + 1);
         if (aClass.getResource("") == null || aClass.getResource("").getPath() == null) {
-            return aClass.getResource("/").getPath().replaceAll("target/classes", "src/main/java");
+            return aClass.getResource(File.separator).getPath().replaceAll("target/classes", "src/main/java");
         }
 
-        final List<String> strings = Lists.newArrayList(aClass.getResource("name").getPath().split(File.separator));
-        final List<String> modules = mavenProject.getParent().getModules();
-        for (String string : strings) {
-            if (modules.contains(string)) {
-                return sourceFolder.replaceAll(artifactId, string);
+        final List<String> strings = Lists.newArrayList(aClass.getResource("").getPath().split(SLASH_REGEXP));
+        final MavenProject parentModule = mavenProject.getParent();
+        if (parentModule != null) {
+            final List<String> modules = parentModule.getModules();
+            for (String string : strings) {
+                if (modules.contains(string)) {
+                    return sourceFolder.replaceAll(artifactId, string);
+                }
             }
         }
         return aClass.getResource("/").getPath().replaceAll("target/classes", "src/main/java");
@@ -133,11 +138,13 @@ public abstract class AbstractClassMetaReader {
             if (method.isSynthetic() || isNotTargetMethod(method)) {
                 continue;
             }
+            method.setAccessible(true);
             final Api api = new Api();
             api.setName(getApiName(method));
             api.setReturnValue(getReturnValue(aClass, method, source, commentMap.get(method.getName())));
             api.setParameters(listParameters(aClass, method, source, commentMap.get(method.getName())));
             api.setDesc(Optional.ofNullable(commentMap.get(method.getName())).orElse(new Comment()).getValue());
+            result.add(api);
         }
         return result;
     }
@@ -341,7 +348,7 @@ public abstract class AbstractClassMetaReader {
         return result;
     }
 
-    private List<FieldMeta> listParameters(Class<?> aClass, Method method, File source, Comment comment) {
+    private List<FieldMeta> listParameters(Class<?> aClass, Method method, File source, Comment comment) throws Exception {
         final MethodComment methodComment = (MethodComment) comment;
         List<FieldMeta> result = Lists.newArrayList();
         Map<String, Comment> parameterComments = methodComment == null ? Maps.newHashMap() : methodComment.getParameterComment();
@@ -353,6 +360,8 @@ public abstract class AbstractClassMetaReader {
             fieldMeta.setTypeName(parameterizedType.getTypeName());
             fieldMeta.setDesc(parameterComments.get(parameter.getName()) == null ? "暂无" : parameterComments.get(parameter.getName()).getValue());
             fieldMeta.setRestriction(findRestrictions(parameter));
+            fieldMeta.setType(getInnerClassMeta(aClass, parameter.getType(), source, parameterizedType));
+            result.add(fieldMeta);
         }
         return result;
     }
@@ -504,7 +513,7 @@ public abstract class AbstractClassMetaReader {
     }
 
     private List<FieldMeta> listFieldMetas(Class<?> aClass, File source, Map<String, ClassMeta> parameterizedMap) throws Exception {
-        if (isCustomType(aClass)) {
+        if (!isCustomType(aClass)) {
             return null;
         }
         Map<String, Comment> fieldCommentMap = getFieldCommentMap(aClass, source);
@@ -536,6 +545,7 @@ public abstract class AbstractClassMetaReader {
             if (needNotGetDetail(declaredField, aClass)) {
                 continue;
             }
+            declaredField.setAccessible(true);
             result.add(getFieldInfo(aClass, declaredField, parameterizedMap, source, fieldCommentMap));
         }
         return result;
@@ -553,7 +563,9 @@ public abstract class AbstractClassMetaReader {
         if (!field.isEnumConstant()) {
             fieldMeta.setType(parameterizedMap != null && parameterizedMap.get(field.getGenericType().getTypeName()) != null ?
                     parameterizedMap.get(field.getGenericType().getTypeName()) :
-                    getInnerClassMeta(rootClass, parameterizedMap.get(field.getGenericType().getTypeName()) != null ? parameterizedMap.get(field.getGenericType().getTypeName()).getClassType() : field.getType(), source, processGenericType(fieldMeta, field)));
+                    getInnerClassMeta(rootClass,
+                            parameterizedMap != null && parameterizedMap.get(field.getGenericType().getTypeName()) != null ? parameterizedMap.get(field.getGenericType().getTypeName()).getClassType() : field.getType(),
+                            source, processGenericType(fieldMeta, field)));
         }
         return fieldMeta;
     }

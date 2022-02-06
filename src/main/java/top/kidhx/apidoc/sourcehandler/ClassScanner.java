@@ -28,6 +28,7 @@ public class ClassScanner {
     private static final String DOT = ".";
 
     private static final String SEPARATOR = File.separator;
+    public static final String SLASH_REGEXP = "[\\\\/]";
 
     private final Log log;
 
@@ -65,7 +66,7 @@ public class ClassScanner {
         });
 
         for (String classFullName : classFullNames) {
-            if (classFullName.startsWith(packagePrefix.replaceAll(SEPARATOR, "."))) {
+            if (classFullName.startsWith(packagePrefix.replaceAll(SLASH_REGEXP, "."))) {
                 final Class<?> aClass = classLoader.loadClass(classFullName);
                 classes.add(aClass);
             }

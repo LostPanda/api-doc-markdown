@@ -60,6 +60,7 @@ public class CycleReferenceChecker {
         dependenciesMap.putIfAbsent(rootClass.getName(), Sets.newHashSet());
         final Set<String> dependencies = dependenciesMap.get(rootClass.getName());
         dependencies.add(dependencyClass.getName());
+        dependenciesMap.put(rootClass.getName(), dependencies);
         scannedClasses.add(dependencyClass);
         scannedClasses.add(rootClass);
     }

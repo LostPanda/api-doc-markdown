@@ -24,8 +24,7 @@ public class FileDocExporter implements DocExporter {
     @Override
     public void exportApiDoc(List<MarkDownApi> apiDocs) {
         if (StringUtils.isBlank(this.outputPath)) {
-            log.error("no output path configured for FileDocExporter");
-            return;
+            this.outputPath = this.getClass().getResource(File.separator).getPath();
         }
 
         for (MarkDownApi apiDoc : apiDocs) {

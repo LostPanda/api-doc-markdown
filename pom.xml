@@ -8,6 +8,8 @@
     <artifactId>api-doc-markdown</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <packaging>maven-plugin</packaging>
+
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
@@ -140,17 +142,41 @@
                         </execution>
                     </executions>
                 </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <configuration>
-                        <source>1.8</source>
-                        <target>1.8</target>
-                        <compilerArgument>-parameters</compilerArgument>
-                    </configuration>
-                </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <compilerArgument>-parameters</compilerArgument>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.github.kidhx</groupId>
+                <artifactId>api-doc-markdown</artifactId>
+                <version>1.0-SNAPSHOT</version>
+                <executions>
+                    <execution>
+                        <id>generate-api-doc</id>
+                        <goals>
+                            <goal>generate-api-doc</goal>
+                        </goals>
+                        <phase>compile</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <packageName>top\kidhx\apidoc\checkinterface</packageName>
+                    <exporters>
+                        <exporter>
+                            <exporterName>file</exporterName>
+                        </exporter>
+                    </exporters>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 
 </project>

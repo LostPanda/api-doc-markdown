@@ -19,7 +19,7 @@ public class InterfaceClassMetaReader extends AbstractClassMetaReader {
 
     @Override
     protected ClassMeta retrieveClassMeta(Class<?> aClass, String sourceFolder) throws Exception {
-        return doRetrieveClassMeta(aClass, sourceFolder, true, true, null);
+        return doRetrieveClassMeta(aClass, sourceFolder, true, false, null);
     }
 
     @Override
