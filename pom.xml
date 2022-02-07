@@ -130,7 +130,7 @@
                     <artifactId>maven-plugin-plugin</artifactId>
                     <version>3.5.2</version>
                     <configuration>
-                        <skioErrorNoDescriptionorsFound>true</skioErrorNoDescriptionorsFound>
+                        <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
                     </configuration>
                     <executions>
                         <execution>
@@ -148,6 +148,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.9.0</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
@@ -168,7 +169,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <packageName>top\kidhx\apidoc\checkinterface</packageName>
+                    <packageName>top.kidhx.apidoc.checkinterface</packageName>
                     <exporters>
                         <exporter>
                             <exporterName>file</exporterName>

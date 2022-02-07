@@ -10,10 +10,8 @@ import top.kidhx.apidoc.bo.*;
 import top.kidhx.apidoc.exporter.ExporterEngine;
 import top.kidhx.apidoc.utils.StreamUtils;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.io.File;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -90,16 +88,16 @@ public class ApiDocGenerator {
         builder.append(writer.h("接口名：", 3));
         builder.append(api.getName());
         builder.append("\n");
-
-
+        generateParameter(api.getParameters(), builder);
+        generateReturnValue(api.getReturnValue(), builder);
     }
 
     private void generateReturnValue(FieldMeta returnValue, StringBuilder builder) throws Exception {
         builder.append("\n");
         builder.append(writer.h("返回结果示例", 3));
-        builder.append("```JSON\n");
+        builder.append("\n```JSON\n");
         builder.append(mocker.mock(returnValue));
-        builder.append("```\n");
+        builder.append("\n```\n");
         builder.append(writer.h("返回结果说明", 3));
         builder.append("\n");
         doGenerateParameter(Lists.newArrayList(returnValue), builder, "returnValue");
@@ -154,19 +152,22 @@ public class ApiDocGenerator {
             return;
         }
 
+        builder.append("\n");
         builder.append(writer.b(classMeta.getClassName()));
         builder.append("\n");
 
-        for (FieldMeta classFieldMeta : classMeta.getClassFieldMetas()) {
-            builder.append(writer.tableCell(classFieldMeta.getName(), "head"));
-            builder.append(writer.tableCell(classFieldMeta.getTypeName(), null));
-            builder.append(writer.tableCell(Optional.ofNullable(classFieldMeta.getDesc()).orElse("暂无"), null));
-            if ("param".equalsIgnoreCase(type)) {
-                builder.append(writer.tableCell(classFieldMeta.getRestriction(), null));
+        if(!CollectionUtils.isEmpty(classMeta.getClassFieldMetas())){
+            tableHeader(builder,type);
+            for (FieldMeta classFieldMeta : classMeta.getClassFieldMetas()) {
+                builder.append(writer.tableCell(classFieldMeta.getName(), "head"));
+                builder.append(writer.tableCell(classFieldMeta.getTypeName(), null));
+                builder.append(writer.tableCell(Optional.ofNullable(classFieldMeta.getDesc()).orElse("暂无"), null));
+                if ("param".equalsIgnoreCase(type)) {
+                    builder.append(writer.tableCell(classFieldMeta.getRestriction(), null));
+                }
+                builder.append("\n");
             }
-            builder.append("\n");
         }
-
     }
 
     private void handleFieldMeta(FieldMeta parameter, StringBuilder builder, List<ClassMeta> classMetas, String type) {
@@ -187,7 +188,7 @@ public class ApiDocGenerator {
             builder.append(writer.tableCell("约束", null));
         }
         builder.append("\n");
-        builder.append("| ------ | ------ | ------ | ------ |");
+        builder.append("| ------ | ------ | ------ |");
         if ("param".equalsIgnoreCase(type)) {
             builder.append(" ------ |");
         }
@@ -199,12 +200,7 @@ public class ApiDocGenerator {
             return;
         }
         if (!CollectionUtils.isEmpty(classMeta.getGenericTypes())) {
-            for (ClassMeta genericType : classMeta.getGenericTypes()) {
-                if (!isCustomType(genericType.getClassName())) {
-                    classMetas.add(genericType);
-                }
-                retrieveClassInfo(genericType, classMetas);
-            }
+            addGenericRealType(classMeta.getGenericTypes(),classMetas);
         }
 
         if (!CollectionUtils.isEmpty(classMeta.getClassFieldMetas())) {
@@ -213,8 +209,20 @@ public class ApiDocGenerator {
                     if (isCustomType(classFieldMeta.getType().getClassName())) {
                         retrieveClassInfo(classFieldMeta.getType(), classMetas);
                     }
+                    if(!CollectionUtils.isEmpty(classFieldMeta.getType().getGenericTypes())){
+                        addGenericRealType(classFieldMeta.getType().getGenericTypes(), classMetas);
+                    }
                 }
             }
+        }
+    }
+
+    private void addGenericRealType(List<ClassMeta> genericTypes, List<ClassMeta> classMetas) {
+        for (ClassMeta genericType : genericTypes) {
+            if (isCustomType(genericType.getClassName())) {
+                classMetas.add(genericType);
+            }
+            retrieveClassInfo(genericType, classMetas);
         }
     }
 

@@ -80,6 +80,10 @@ public class ApiGeneratorMojo extends AbstractMojo {
                                     .put("output", outputDirectory.getAbsolutePath() + File.separator + "apiDoc" + File.separator)
                                     .build()));
         }
+        {
+            //replace dot to file separator
+            this.packageName = String.join(File.separator,packageName.split("\\."));
+        }
     }
 
     private ClassInfoReaderType getReaderType() throws MojoExecutionException {

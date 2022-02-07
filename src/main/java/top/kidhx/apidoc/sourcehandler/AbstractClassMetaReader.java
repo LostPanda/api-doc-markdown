@@ -14,6 +14,7 @@ import top.kidhx.apidoc.bo.enums.CommentType;
 
 import javax.validation.constraints.*;
 import java.io.File;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.net.URLClassLoader;
 import java.util.Collection;
@@ -201,8 +202,10 @@ public abstract class AbstractClassMetaReader {
         for (String className : parameterizedNameList) {
             final ClassMeta classMeta = new ClassMeta();
             if (isGenericType(className)) {
+                final String classOriginalName = className.substring(0, className.indexOf("<")).trim();
                 classMeta.setGenericTypes(listGenericType(rootClass, className, source));
-                classMeta.setClassType(urlClassLoader.loadClass(className.substring(0, className.indexOf("<")).trim()));
+                classMeta.setClassType(urlClassLoader.loadClass(classOriginalName));
+                classMeta.setClassName(classOriginalName);
                 classMetas.add(classMeta);
             } else {
                 Class<?> aClass = null;
@@ -366,142 +369,142 @@ public abstract class AbstractClassMetaReader {
         return result;
     }
 
-    private String findRestrictions(AnnotatedElement parameter) {
+    private String findRestrictions(AnnotatedElement parameter) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         final StringBuilder builder = new StringBuilder();
 
         if (ArrayUtils.isEmpty(parameter.getAnnotations())) {
             return StringUtils.EMPTY;
         }
 
-        final NotNull notNull = parameter.getAnnotation(NotNull.class);
+        final Annotation notNull =  getAnnotation(parameter.getAnnotations(), NotNull.class);
         if (notNull != null) {
             builder.append("`非空`<br/>");
         }
 
-        final NotBlank notBlank = parameter.getAnnotation(NotBlank.class);
-        final org.hibernate.validator.constraints.NotBlank hibernateNotBlank = parameter.getAnnotation(org.hibernate.validator.constraints.NotBlank.class);
+        final Annotation notBlank = getAnnotation(parameter.getAnnotations(), NotBlank.class);
+        final Annotation hibernateNotBlank = getAnnotation(parameter.getAnnotations(),org.hibernate.validator.constraints.NotBlank.class);
         if (notBlank != null || hibernateNotBlank != null) {
             builder.append("`非空字符串`<br/>");
         }
 
-        final Null doNull = parameter.getAnnotation(Null.class);
+        final Annotation doNull = getAnnotation(parameter.getAnnotations(), Null.class);
         if (doNull != null) {
             builder.append("`必须为空值`<br/>");
         }
 
-        final Digits digits = parameter.getAnnotation(Digits.class);
+        final Annotation digits = getAnnotation(parameter.getAnnotations(), Digits.class);
         if (digits != null) {
             builder.append("`必须为数字-");
-            final int integer = digits.integer();
-            final int fraction = digits.fraction();
+            final Object integer = digits.annotationType().getMethod("integer").invoke(digits);
+            final Object fraction = digits.annotationType().getMethod("fraction").invoke(digits);
             builder.append("整数最大值为:" + integer + "位");
             builder.append("小数位最多为:" + fraction + "位`<br/>");
         }
 
-        final AssertFalse assertFalse = parameter.getAnnotation(AssertFalse.class);
+        final Annotation assertFalse = getAnnotation(parameter.getAnnotations(), AssertFalse.class);
         if (assertFalse != null) {
             builder.append("`必须为false`<br/>");
         }
 
-        final AssertTrue assertTrue = parameter.getAnnotation(AssertTrue.class);
+        final Annotation assertTrue = getAnnotation(parameter.getAnnotations(), AssertTrue.class);
         if (assertTrue != null) {
             builder.append("`必须为true`<br/>");
         }
 
-        final Max max = parameter.getAnnotation(Max.class);
+        final Annotation max = getAnnotation(parameter.getAnnotations(), Max.class);
         if (max != null) {
             builder.append("`整形，最小值为");
-            builder.append(max.value());
+            builder.append(max.annotationType().getMethod("value").invoke(max));
             builder.append("`<br/>");
         }
 
-        final Min min = parameter.getAnnotation(Min.class);
+        final Annotation min = getAnnotation(parameter.getAnnotations(), Min.class);
         if (min != null) {
             builder.append("`整形，最大值为");
-            builder.append(min.value());
+            builder.append(min.annotationType().getMethod("value").invoke(min));
             builder.append("`<br/>");
         }
 
-        final Past past = parameter.getAnnotation(Past.class);
+        final Annotation past = getAnnotation(parameter.getAnnotations(), Past.class);
         if (past != null) {
             builder.append("`必须为过去的时间`<br/>");
         }
 
-        final Pattern pattern = parameter.getAnnotation(Pattern.class);
+        final Annotation pattern = getAnnotation(parameter.getAnnotations(), Pattern.class);
         if (pattern != null) {
             builder.append("`请匹配正则表达式:");
-            builder.append(pattern.regexp());
+            builder.append(pattern.annotationType().getMethod("regexp").invoke(pattern));
             builder.append("`<br/>");
         }
 
-        final Size size = parameter.getAnnotation(Size.class);
+        final Annotation size = getAnnotation(parameter.getAnnotations(), Size.class);
         if (size != null) {
             builder.append("`最大容量为:");
-            builder.append(size.max());
+            builder.append(size.annotationType().getMethod("max").invoke(size));
             builder.append(",最小容量为:");
-            builder.append(size.min());
+            builder.append(size.annotationType().getMethod("min").invoke(size));
             builder.append("`<br/>");
         }
 
-        final DecimalMax decimalMax = parameter.getAnnotation(DecimalMax.class);
+        final Annotation decimalMax = getAnnotation(parameter.getAnnotations(), DecimalMax.class);
         if (decimalMax != null) {
             builder.append("`浮点型最大值为:");
-            builder.append(decimalMax.value());
+            builder.append(decimalMax.annotationType().getMethod("value").invoke(decimalMax));
             builder.append("是否包含边界:");
-            builder.append(decimalMax.inclusive());
+            builder.append(decimalMax.annotationType().getMethod("inclusive").invoke(decimalMax));
             builder.append("`<br/>");
         }
 
-        final DecimalMin decimalMin = parameter.getAnnotation(DecimalMin.class);
+        final Annotation decimalMin = getAnnotation(parameter.getAnnotations(), DecimalMin.class);
         if (decimalMin != null) {
             builder.append("`浮点型最小值为:");
-            builder.append(decimalMin.value());
+            builder.append(decimalMin.annotationType().getMethod("value").invoke(decimalMin));
             builder.append("是否包含边界:");
-            builder.append(decimalMin.inclusive());
+            builder.append(decimalMin.annotationType().getMethod("inclusive").invoke(decimalMin));
             builder.append("`<br/>");
         }
 
-        final Future future = parameter.getAnnotation(Future.class);
+        final Annotation future = getAnnotation(parameter.getAnnotations(), Future.class);
         if (future != null) {
             builder.append("`必须为未来的时间`<br/>");
         }
 
-        final PastOrPresent pastOrPresent = parameter.getAnnotation(PastOrPresent.class);
+        final Annotation pastOrPresent = getAnnotation(parameter.getAnnotations(), PastOrPresent.class);
         if (pastOrPresent != null) {
             builder.append("`必须为当前或者过去的时间`<br/>");
         }
 
-        final Negative negative = parameter.getAnnotation(Negative.class);
+        final Annotation negative = getAnnotation(parameter.getAnnotations(), Negative.class);
         if (negative != null) {
             builder.append("`必须为负数`<br/>");
         }
 
-        final NegativeOrZero negativeOrZero = parameter.getAnnotation(NegativeOrZero.class);
+        final Annotation negativeOrZero = getAnnotation(parameter.getAnnotations(), NegativeOrZero.class);
         if (negativeOrZero != null) {
             builder.append("`必须为零或者负数`<br/>");
         }
 
-        final Positive positive = parameter.getAnnotation(Positive.class);
+        final Annotation positive = getAnnotation(parameter.getAnnotations(), Positive.class);
         if (positive != null) {
             builder.append("`必须为正数`<br/>");
         }
 
-        final PositiveOrZero positiveOrZero = parameter.getAnnotation(PositiveOrZero.class);
+        final Annotation positiveOrZero = getAnnotation(parameter.getAnnotations(), PositiveOrZero.class);
         if (positiveOrZero != null) {
             builder.append("`必须为零或者整数`<br/>");
         }
 
-        final NotEmpty notEmpty = parameter.getAnnotation(NotEmpty.class);
+        final Annotation notEmpty = getAnnotation(parameter.getAnnotations(), NotEmpty.class);
         if (notEmpty != null) {
             builder.append("`数组或字符串不能null, 并且容量必须大于0`<br/>");
         }
 
-        final Email email = parameter.getAnnotation(Email.class);
+        final Annotation email = getAnnotation(parameter.getAnnotations(), Email.class);
         if (email != null) {
             builder.append("`必须为电子邮件地址格式`<br/>");
         }
 
-        final RequestBody requestBody = parameter.getAnnotation(RequestBody.class);
+        final Annotation requestBody = getAnnotation(parameter.getAnnotations(), RequestBody.class);
         if (requestBody != null) {
             builder.append("`请从requestBody传入参数`<br/>");
         }
@@ -510,6 +513,15 @@ public abstract class AbstractClassMetaReader {
             return StringUtils.EMPTY;
         }
         return restrictions.substring(0, restrictions.lastIndexOf("<br/>"));
+    }
+
+    private Annotation getAnnotation(Annotation[] annotations, Class<? extends Annotation> annotationClass){
+        for (Annotation annotation : annotations) {
+            if(annotationClass.getName().equalsIgnoreCase(annotation.annotationType().getName())){
+                return annotation;
+            }
+        }
+        return null;
     }
 
     private List<FieldMeta> listFieldMetas(Class<?> aClass, File source, Map<String, ClassMeta> parameterizedMap) throws Exception {

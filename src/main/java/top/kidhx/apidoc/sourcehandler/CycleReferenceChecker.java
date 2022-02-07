@@ -41,7 +41,7 @@ public class CycleReferenceChecker {
             return false;
         }
         if (dependencies.contains(aClass.getName()) || aClass == dependencyClass) {
-            return false;
+            return true;
         }
         if (testedClasses.contains(dependencyClass.getName())) {
             return false;

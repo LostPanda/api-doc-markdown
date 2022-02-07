@@ -72,7 +72,9 @@ public class Mocker {
             return mockDouble();
         } else if (parameterType == char.class || parameterType == Character.class) {
             return mockCharacter();
-        } else if (parameterType == Date.class || Temporal.class.isAssignableFrom(parameterType) || java.sql.Date.class == parameterType) {
+        } else if(parameterType == String.class){
+            return mockString();
+        }else if (parameterType == Date.class || Temporal.class.isAssignableFrom(parameterType) || java.sql.Date.class == parameterType) {
             return "2022-01-01";
         } else if (Collection.class.isAssignableFrom(parameterType)) {
             return mockCollection(classMeta);

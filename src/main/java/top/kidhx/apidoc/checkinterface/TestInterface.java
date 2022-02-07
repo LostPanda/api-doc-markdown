@@ -3,6 +3,7 @@ package top.kidhx.apidoc.checkinterface;
 import top.kidhx.apidoc.bo.ClassMeta;
 import top.kidhx.apidoc.bo.FieldMeta;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 
@@ -17,5 +18,5 @@ public interface TestInterface {
      * @param metas 参数
      * @return 返回
      */
-    ClassMeta  foundMetas(Map<Long, Long> metas);
+    ClassMeta  foundMetas(@NotNull Map<Long, Long> metas);
 }

@@ -1,5 +1,6 @@
 package top.kidhx.apidoc.exporter;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugin.logging.Log;
 import top.kidhx.apidoc.bo.MarkDownApi;
@@ -24,7 +25,7 @@ public class FileDocExporter implements DocExporter {
     @Override
     public void exportApiDoc(List<MarkDownApi> apiDocs) {
         if (StringUtils.isBlank(this.outputPath)) {
-            this.outputPath = this.getClass().getResource(File.separator).getPath();
+            this.outputPath = this.getClass().getResource("/").getPath();
         }
 
         for (MarkDownApi apiDoc : apiDocs) {
