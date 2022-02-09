@@ -169,6 +169,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <readerType>SPRING_CONTROLLER</readerType>
                     <packageName>top.kidhx.apidoc.checkinterface</packageName>
                     <exporters>
                         <exporter>

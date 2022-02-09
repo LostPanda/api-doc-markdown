@@ -33,11 +33,11 @@ public abstract class AbstractClassMetaReader {
     public static Map<String, ClassMeta> foundClasses;
     protected Log log;
     protected ClassLoader classLoader;
-    private CycleReferenceChecker cycleReferenceChecker;
+    private final CycleReferenceChecker cycleReferenceChecker;
     private URLClassLoader urlClassLoader;
-    private SourceCodeReader sourceCodeReader;
+    private final SourceCodeReader sourceCodeReader;
     private List<Class<?>> classes;
-    private MavenProject mavenProject;
+    private final MavenProject mavenProject;
 
     public AbstractClassMetaReader(Log log, MavenProject mavenProject, ClassLoader classLoader) {
         cycleReferenceChecker = new CycleReferenceChecker();
@@ -163,36 +163,36 @@ public abstract class AbstractClassMetaReader {
         return fieldMeta;
     }
 
-    private ClassMeta getInnerClassMeta(Class<?> rootClass, Class<?> dependencyClass, File source, Type genericReturnType) throws Exception {
-        if (isCustomType(dependencyClass)) {
-            if (!cycleReferenceChecker.isCycled(rootClass, dependencyClass)) {
+    private ClassMeta getInnerClassMeta(Class<?> owner, Class<?> aClass, File source, Type genericReturnType) throws Exception {
+        if (isCustomType(aClass)) {
+            if (!cycleReferenceChecker.isCycled(owner, aClass)) {
                 Map<String, ClassMeta> parameterizedMap = null;
                 if (genericReturnType instanceof ParameterizedType) {
-                    parameterizedMap = getParameterizedMap(rootClass, source, dependencyClass, genericReturnType);
+                    parameterizedMap = getParameterizedMap(owner, source, aClass, genericReturnType);
                 }
-                return doRetrieveClassMeta(dependencyClass, source.getAbsolutePath(), false, true, parameterizedMap);
+                return doRetrieveClassMeta(aClass, source.getAbsolutePath(), false, true, parameterizedMap);
             } else {
-                final ClassMeta classMeta = foundClasses.get(dependencyClass.getName());
+                final ClassMeta classMeta = foundClasses.get(aClass.getName());
                 if (classMeta == null) {
-                    return new ClassMeta().setClassName(dependencyClass.getName()).setClassType(dependencyClass);
+                    return new ClassMeta().setClassName(aClass.getName()).setClassType(aClass);
                 }
                 return classMeta;
             }
         } else if (genericReturnType != null && isGenericType(genericReturnType.getTypeName())) {
-            if (!cycleReferenceChecker.isCycled(rootClass, dependencyClass) || foundClasses.get(dependencyClass.getName()) == null) {
+            if (!cycleReferenceChecker.isCycled(owner, aClass) || foundClasses.get(aClass.getName()) == null) {
                 final ClassMeta classMeta = new ClassMeta();
-                classMeta.setGenericTypes(listGenericType(dependencyClass, genericReturnType.getTypeName(), source));
+                classMeta.setGenericTypes(listGenericType(aClass, genericReturnType.getTypeName(), source));
                 classMeta.setClassName(((ParameterizedType) genericReturnType).getTypeName());
                 classMeta.setClassType((Class<?>) (((ParameterizedType) genericReturnType).getRawType()));
                 return classMeta;
             } else {
-                return foundClasses.get(dependencyClass.getName());
+                return foundClasses.get(aClass.getName());
             }
         }
-        return new ClassMeta().setClassName(dependencyClass.getName()).setClassType(dependencyClass);
+        return new ClassMeta().setClassName(aClass.getName()).setClassType(aClass);
     }
 
-    private List<ClassMeta> listGenericType(Class<?> rootClass, String typeName, File source) throws Exception {
+    private List<ClassMeta> listGenericType(Class<?> genericOwner, String typeName, File source) throws Exception {
         List<ClassMeta> classMetas = Lists.newArrayList();
         final String tempName = typeName.substring(typeName.indexOf("<") + 1, typeName.length() - 1);
         if (tempName.equalsIgnoreCase("?")) {
@@ -203,7 +203,7 @@ public abstract class AbstractClassMetaReader {
             final ClassMeta classMeta = new ClassMeta();
             if (isGenericType(className)) {
                 final String classOriginalName = className.substring(0, className.indexOf("<")).trim();
-                classMeta.setGenericTypes(listGenericType(rootClass, className, source));
+                classMeta.setGenericTypes(listGenericType(genericOwner, className, source));
                 classMeta.setClassType(urlClassLoader.loadClass(classOriginalName));
                 classMeta.setClassName(classOriginalName);
                 classMetas.add(classMeta);
@@ -214,7 +214,7 @@ public abstract class AbstractClassMetaReader {
                 } catch (ClassNotFoundException e) {
                     continue;
                 }
-                final ClassMeta innerClassMeta = getInnerClassMeta(rootClass, aClass, source, null);
+                final ClassMeta innerClassMeta = getInnerClassMeta(genericOwner, aClass, source, null);
                 classMetas.add(innerClassMeta);
             }
         }

@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
  */
 public class ApiDocGenerator {
 
+    public static final String TYPE_PARAM = "param";
+    public static final String TYPE_RETURN_VALUE = "returnValue";
     private MarkdownWriter writer;
 
     private Mocker mocker;
@@ -100,7 +102,7 @@ public class ApiDocGenerator {
         builder.append("\n```\n");
         builder.append(writer.h("返回结果说明", 3));
         builder.append("\n");
-        doGenerateParameter(Lists.newArrayList(returnValue), builder, "returnValue");
+        doGenerateParameter(Lists.newArrayList(returnValue), builder, TYPE_RETURN_VALUE);
     }
 
     private void generateParameter(List<FieldMeta> parameters, StringBuilder builder) {
@@ -111,7 +113,7 @@ public class ApiDocGenerator {
             return;
         }
 
-        doGenerateParameter(parameters, builder, "param");
+        doGenerateParameter(parameters, builder, TYPE_PARAM);
     }
 
     private void doGenerateParameter(List<FieldMeta> parameters, StringBuilder builder, String type) {

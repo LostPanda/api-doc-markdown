@@ -67,8 +67,10 @@ public class WebClassMetaReader extends AbstractClassMetaReader {
         log.info("current class:" + aClass);
         for (Class<? extends Annotation> controllerAnnotationClass : CONTROLLER_ANNOTATIONS) {
             try {
-                final Class<?> controllerAnnotation = classLoader.loadClass(controllerAnnotationClass.getName());
-                if (controllerAnnotation != null) {
+                final Class<? extends Annotation> controllerAnnotation = (Class<? extends Annotation>) classLoader.loadClass(controllerAnnotationClass.getName());
+                final Annotation annotation = aClass.getAnnotation(controllerAnnotation);
+                if (annotation != null) {
+                    currentClass.set(aClass);
                     return true;
                 }
             } catch (ClassNotFoundException e) {
@@ -144,33 +146,33 @@ public class WebClassMetaReader extends AbstractClassMetaReader {
 
     private Set<String> getPath(AnnotatedElement annotatedElement) {
         try {
-            final GetMapping getMapping = AnnotationUtils.findAnnotation(annotatedElement, (Class<GetMapping>) classLoader.loadClass(GetMapping.class.getName()));
+            final Annotation getMapping = AnnotationUtils.findAnnotation(annotatedElement, (Class<GetMapping>) classLoader.loadClass(GetMapping.class.getName()));
             if (getMapping != null) {
                 return doGetPath(getMapping);
             }
 
-            final PostMapping postMapping = AnnotationUtils.findAnnotation(annotatedElement, (Class<PostMapping>) classLoader.loadClass(PostMapping.class.getName()));
+            final Annotation postMapping = AnnotationUtils.findAnnotation(annotatedElement, (Class<PostMapping>) classLoader.loadClass(PostMapping.class.getName()));
             if (postMapping != null) {
                 return doGetPath(postMapping);
             }
 
-            final DeleteMapping deleteMapping = AnnotationUtils.findAnnotation(annotatedElement, (Class<DeleteMapping>) classLoader.loadClass(DeleteMapping.class.getName()));
+            final Annotation deleteMapping = AnnotationUtils.findAnnotation(annotatedElement, (Class<DeleteMapping>) classLoader.loadClass(DeleteMapping.class.getName()));
             if (deleteMapping != null) {
                 return doGetPath(deleteMapping);
             }
 
-            final PatchMapping patchMapping = AnnotationUtils.findAnnotation(annotatedElement, (Class<PatchMapping>) classLoader.loadClass(PatchMapping.class.getName()));
+            final Annotation patchMapping = AnnotationUtils.findAnnotation(annotatedElement, (Class<PatchMapping>) classLoader.loadClass(PatchMapping.class.getName()));
             if (patchMapping != null) {
                 return doGetPath(patchMapping);
             }
 
-            final PutMapping putMapping = AnnotationUtils.findAnnotation(annotatedElement, (Class<PutMapping>) classLoader.loadClass(PutMapping.class.getName()));
+            final Annotation putMapping = AnnotationUtils.findAnnotation(annotatedElement, (Class<PutMapping>) classLoader.loadClass(PutMapping.class.getName()));
             if (putMapping != null) {
                 return doGetPath(putMapping);
             }
 
             final Class<RequestMapping> requestMappingClass = (Class<RequestMapping>) classLoader.loadClass(RequestMapping.class.getName());
-            final RequestMapping requestMapping = AnnotationUtils.findAnnotation(annotatedElement, requestMappingClass);
+            final Annotation requestMapping = AnnotationUtils.findAnnotation(annotatedElement, requestMappingClass);
             if (requestMapping != null) {
                 return doGetPath(requestMapping);
             }
@@ -203,7 +205,7 @@ public class WebClassMetaReader extends AbstractClassMetaReader {
             return null;
         }
         final StringBuilder builder = new StringBuilder();
-        if (!CollectionUtils.isEmpty(classRotes)) {
+        if (CollectionUtils.isEmpty(classRotes)) {
             for (String methodPath : value) {
                 builder.append(methodPath);
                 builder.append(" ");

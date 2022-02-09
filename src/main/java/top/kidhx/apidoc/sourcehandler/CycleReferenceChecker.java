@@ -22,34 +22,34 @@ public class CycleReferenceChecker {
         dependenciesMap = Maps.newHashMap();
     }
 
-    boolean isCycled(Class<?> aClass, Class<?> dependencyClass) throws ClassNotFoundException {
-        if (dependencyClass.getName().equalsIgnoreCase(aClass.getName())) {
+    boolean isCycled(Class<?> owner, Class<?> dependency) throws ClassNotFoundException {
+        if (dependency.getName().equalsIgnoreCase(owner.getName())) {
             return true;
         }
-        addDependencies(aClass, dependencyClass);
-        if (!scannedClasses.contains(aClass)) {
+        addDependencies(owner, dependency);
+        if (!scannedClasses.contains(owner)) {
             return false;
         }
-        return isReferenced(aClass, dependencyClass, Sets.newHashSet());
+        return isReferenced(owner, dependency, Sets.newHashSet());
     }
 
-    private boolean isReferenced(Class<?> aClass, Class<?> dependencyClass, Set<String> testedClasses) throws ClassNotFoundException {
-        Set<String> dependencies = dependenciesMap.get(dependencyClass.getName());
+    private boolean isReferenced(Class<?> owner, Class<?> dependency, Set<String> checkedClassSet) throws ClassNotFoundException {
+        Set<String> dependencies = dependenciesMap.get(dependency.getName());
 
         if (CollectionUtils.isEmpty(dependencies)) {
-            testedClasses.add(dependencyClass.getName());
+            checkedClassSet.add(dependency.getName());
             return false;
         }
-        if (dependencies.contains(aClass.getName()) || aClass == dependencyClass) {
+        if (dependencies.contains(owner.getName()) || owner == dependency) {
             return true;
         }
-        if (testedClasses.contains(dependencyClass.getName())) {
+        if (checkedClassSet.contains(dependency.getName())) {
             return false;
         }
 
-        testedClasses.add(dependencyClass.getName());
-        for (String dependency : dependencies) {
-            if (isReferenced(aClass, Class.forName(dependency), testedClasses)) {
+        checkedClassSet.add(dependency.getName());
+        for (String historyDependency : dependencies) {
+            if (isReferenced(owner, Class.forName(historyDependency), checkedClassSet)) {
                 return true;
             }
         }
