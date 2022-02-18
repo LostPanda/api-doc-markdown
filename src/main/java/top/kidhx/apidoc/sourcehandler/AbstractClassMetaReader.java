@@ -30,6 +30,7 @@ import static top.kidhx.apidoc.sourcehandler.ClassScanner.SLASH_REGEXP;
  */
 public abstract class AbstractClassMetaReader {
 
+    public static final String VOID = "void";
     public static Map<String, ClassMeta> foundClasses;
     protected Log log;
     protected ClassLoader classLoader;
@@ -158,7 +159,7 @@ public abstract class AbstractClassMetaReader {
         final MethodComment methodComment = (MethodComment) comment;
         fieldMeta.setName(returnType.getName());
         fieldMeta.setTypeName(genericReturnType.getTypeName());
-        fieldMeta.setType("void".equals(genericReturnType.getTypeName()) ? null : getInnerClassMeta(aClass, returnType, source, genericReturnType));
+        fieldMeta.setType(VOID.equalsIgnoreCase(genericReturnType.getTypeName()) ? null : getInnerClassMeta(aClass, returnType, source, genericReturnType));
         fieldMeta.setDesc(methodComment == null || methodComment.getReturnComment() == null ? "暂无" : methodComment.getReturnComment().getValue());
         return fieldMeta;
     }

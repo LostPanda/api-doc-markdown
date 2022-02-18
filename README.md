@@ -33,7 +33,6 @@ a maven plugin to generate markdown api files
                         <phase>compile</phase>
                     </execution>
                 </executions>
-                <configuration>
                     <!--需要扫描的包前缀，必须已'.'隔开-->
                 <configuration>
                     <packageName>top.kidhx.apidoc.checkinterface</packageName>
@@ -43,7 +42,7 @@ a maven plugin to generate markdown api files
                             <exporterName>file</exporterName>
                             <parameters>
                               <!--不配置默认导出到class path根目录-->
-                              <outputPath>/Users/xxx/myApiDoc<outputPath>
+                              <outputPath>/Users/xxx/myApiDoc</outputPath>
                             </parameters>
                         </exporter>
                     </exporters>
