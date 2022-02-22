@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
+ * custom parameterizedTypeImpl - to set type name
  * @author HX
  * @date 2022/1/30
  */

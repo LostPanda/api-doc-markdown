@@ -24,9 +24,7 @@ import java.util.*;
 public class ClassScanner {
 
     private static final String CLASS_POSTFIX = ".class";
-
     private static final String DOT = ".";
-
     private static final String SEPARATOR = File.separator;
     public static final String SLASH_REGEXP = "[\\\\/]";
 

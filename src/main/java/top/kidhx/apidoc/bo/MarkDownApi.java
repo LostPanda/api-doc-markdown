@@ -10,9 +10,16 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 public class MarkDownApi {
+    /**
+     * file name
+     */
     private String name;
-
+    /**
+     * md5 key
+     */
     private String md5;
-
+    /**
+     * doc content
+     */
     private String content;
 }

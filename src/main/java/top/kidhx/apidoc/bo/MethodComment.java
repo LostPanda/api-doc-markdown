@@ -13,9 +13,13 @@ import java.util.Map;
 @Data
 @Accessors(chain = true)
 public class MethodComment extends Comment {
-
+    /**
+     * parameter comments
+     */
     private Map<String, Comment> parameterComment;
-
+    /**
+     * method return comment
+     */
     private Comment returnComment;
 
     public MethodComment() {

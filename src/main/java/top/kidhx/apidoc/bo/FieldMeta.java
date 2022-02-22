@@ -10,14 +10,24 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 public class FieldMeta {
-
+    /**
+     * field name
+     */
     private String name;
-
+    /**
+     * field type info
+     */
     private ClassMeta type;
-
+    /**
+     * field type name
+     */
     private String typeName;
-
+    /**
+     * field comment
+     */
     private String desc;
-
+    /**
+     * field restrict(spring validation/hibernate)
+     */
     private String restriction;
 }
