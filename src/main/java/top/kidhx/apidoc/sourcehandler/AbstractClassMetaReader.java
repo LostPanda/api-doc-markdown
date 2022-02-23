@@ -196,7 +196,7 @@ public abstract class AbstractClassMetaReader {
     private List<ClassMeta> listGenericType(Class<?> genericOwner, String typeName, File source) throws Exception {
         List<ClassMeta> classMetas = Lists.newArrayList();
         final String tempName = typeName.substring(typeName.indexOf("<") + 1, typeName.length() - 1);
-        if (tempName.equalsIgnoreCase("?")) {
+        if ("?".equalsIgnoreCase(tempName)) {
             return null;
         }
         List<String> parameterizedNameList = getParameterizedNameList(tempName);
@@ -398,8 +398,8 @@ public abstract class AbstractClassMetaReader {
             builder.append("`必须为数字-");
             final Object integer = digits.annotationType().getMethod("integer").invoke(digits);
             final Object fraction = digits.annotationType().getMethod("fraction").invoke(digits);
-            builder.append("整数最大值为:" + integer + "位");
-            builder.append("小数位最多为:" + fraction + "位`<br/>");
+            builder.append("整数最大值为:").append(integer).append("位");
+            builder.append("小数位最多为:").append(fraction).append("位`<br/>");
         }
 
         final Annotation assertFalse = getAnnotation(parameter.getAnnotations(), AssertFalse.class);
