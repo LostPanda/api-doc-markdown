@@ -70,7 +70,7 @@ public class ApiGeneratorMojo extends AbstractMojo {
     private void init() throws MojoExecutionException {
         this.log = getLog();
         classScanner = new ClassScanner(log);
-        urlClassLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+        urlClassLoader = (URLClassLoader) this.getClass().getClassLoader();
         classMetaReader = ClassMetaReaderFactory.createClassReader(getReaderType(), mavenProject, log, urlClassLoader);
         if (CollectionUtils.isEmpty(exporters)) {
             exporters = Lists.newArrayList(
